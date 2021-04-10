@@ -1,0 +1,1 @@
+# Openscap-RuleTest
