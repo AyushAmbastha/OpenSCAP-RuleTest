@@ -3,7 +3,7 @@
 if [[ $UID -ne '0' ]]
 then
     echo 'Error: You need to be root user to run this test!'
-    exit ${XCCDF_RESULT_FAIL}
+    exit ${XCCDF_RESULT_ERROR}
 fi
 
 RET=${XCCDF_RESULT_PASS}
@@ -14,6 +14,7 @@ function setup () {
     #If repositories are not configured
     if [ ! -d $REPO ]; then
         echo "FATAL ERROR: Repositories are not configured for setup to continue!"
+        exit ${XCCDF_RESULT_ERROR}
     fi
 
     #Download the required packages
@@ -30,6 +31,7 @@ function check_sshd_config_exists() {
     #Check if sshd config file exists
     if [ ! -f $SSHD_CONFIG ]; then
         echo 'FATAL ERROR: SSH config file does not exit!'
+        RET=${XCCDF_RESULT_FAIL}
     else echo 'Pass: SSH config file exists'
     fi
 }
@@ -38,6 +40,7 @@ function check_client_alive_count() {
     if ! grep -qP "^(?=[\s]*+[^#])[^#]*(ClientAliveCountMax 0)" $SSHD_CONFIG; then
         echo 'ERROR: ClientAliveCountMax needs to be set to 0 in the sshd_config file!'
         echo 'Expected Value: This is number of null packets that will be sent to an unresponsive client.'
+        RET=${XCCDF_RESULT_FAIL}
     else echo 'Pass: ClientAliveCountMax configured correctly in sshd_config'
     fi
 }
@@ -46,6 +49,7 @@ function check_client_alive_interval() {
     if ! grep -qP "^(?=[\s]*+[^#])[^#]*(ClientAliveInterval [0-9])" $SSHD_CONFIG; then
         echo 'ERROR: ClientAliveInterval needs to be set in the sshd_config file!'
         echo 'Expected Value: This is number of seconds the server will wait before sending a null packet to the client to keep the connection alive.'
+        RET=${XCCDF_RESULT_FAIL}
     else echo 'Pass: ClientAliveInterval configured correctly in sshd_config'
     fi
 }
